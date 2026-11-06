@@ -33,6 +33,10 @@ yarn-error.log*
 # env files
 .env*
 .env.exemple
+
+# documentation (kept locally)
+/docs/
+
 # vercel
 .vercel
 
