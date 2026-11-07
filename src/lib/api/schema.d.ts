@@ -1470,6 +1470,403 @@ export interface paths {
         };
         trace?: never;
     };
+    "/tokraf/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mendapatkan katalog produk TOKRAF
+         * @description Publik hanya menerima produk berstatus terbit.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: components["parameters"]["Page"];
+                    limit?: components["parameters"]["Limit"];
+                    search?: components["parameters"]["Search"];
+                    category_id?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Daftar produk TOKRAF */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Success"] & {
+                            data?: components["schemas"]["TokrafProduct"][];
+                            pagination?: components["schemas"]["Pagination"];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Membuat produk TOKRAF
+         * @description Memerlukan role admin_hima atau admin_ekraf.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TokrafProductInput"];
+                };
+            };
+            responses: {
+                /** @description Produk berhasil dibuat */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Success"] & {
+                            data?: components["schemas"]["TokrafProduct"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                422: components["responses"]["ValidationError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tokraf/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        /** Mendapatkan detail produk TOKRAF */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Detail produk TOKRAF yang terbit */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Success"] & {
+                            data?: components["schemas"]["TokrafProduct"];
+                        };
+                    };
+                };
+                404: components["responses"]["NotFound"];
+            };
+        };
+        /**
+         * Memperbarui produk TOKRAF
+         * @description Memerlukan role admin_hima atau admin_ekraf.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TokrafProductInput"];
+                };
+            };
+            responses: {
+                /** @description Produk berhasil diperbarui */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Success"] & {
+                            data?: components["schemas"]["TokrafProduct"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                422: components["responses"]["ValidationError"];
+            };
+        };
+        post?: never;
+        /**
+         * Menghapus produk TOKRAF
+         * @description Memerlukan role admin_hima atau admin_ekraf.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: components["responses"]["SuccessMessage"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tokraf/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mendapatkan kategori produk TOKRAF */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Daftar kategori TOKRAF */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Success"] & {
+                            data?: components["schemas"]["TokrafCategory"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Membuat kategori TOKRAF
+         * @description Memerlukan role admin_hima atau admin_ekraf.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TokrafCategoryInput"];
+                };
+            };
+            responses: {
+                /** @description Kategori berhasil dibuat */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Success"] & {
+                            data?: components["schemas"]["TokrafCategory"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                422: components["responses"]["ValidationError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tokraf/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Memperbarui kategori TOKRAF
+         * @description Memerlukan role admin_hima atau admin_ekraf.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TokrafCategoryInput"];
+                };
+            };
+            responses: {
+                /** @description Kategori berhasil diperbarui */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Success"] & {
+                            data?: components["schemas"]["TokrafCategory"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                422: components["responses"]["ValidationError"];
+            };
+        };
+        post?: never;
+        /**
+         * Menghapus kategori TOKRAF
+         * @description Gagal dengan 409 jika kategori masih dipakai produk.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: components["responses"]["SuccessMessage"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                /** @description Kategori masih digunakan oleh produk */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tokraf/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mendapatkan profil toko TOKRAF */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Profil toko TOKRAF */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Success"] & {
+                            data?: components["schemas"]["TokrafStoreProfile"];
+                        };
+                    };
+                };
+            };
+        };
+        /**
+         * Memperbarui profil toko TOKRAF
+         * @description Memerlukan role admin_hima atau admin_ekraf.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TokrafStoreProfileInput"];
+                };
+            };
+            responses: {
+                /** @description Profil toko berhasil diperbarui */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Success"] & {
+                            data?: components["schemas"]["TokrafStoreProfile"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                422: components["responses"]["ValidationError"];
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1509,11 +1906,16 @@ export interface components {
         };
         Admin: {
             /** Format: uuid */
-            user_id?: string;
+            user_id: string;
             /** @example Admin HIMATIKA */
-            nama?: string;
+            nama: string;
             /** Format: email */
-            email?: string;
+            email: string;
+            /**
+             * @description Role menjadi sumber otorisasi server; bukan sekadar kontrol tampilan.
+             * @enum {string}
+             */
+            role: "admin_hima" | "admin_ekraf";
         };
         LoginResponse: {
             /** @example true */
@@ -1701,6 +2103,99 @@ export interface components {
             /** @example 2026/2027 */
             periode: string;
         };
+        TokrafCategory: {
+            /** Format: int64 */
+            id_kategori: number;
+            nama: string;
+            slug: string;
+            /** @default 0 */
+            urutan: number;
+        };
+        TokrafCategoryInput: {
+            nama: string;
+            slug: string;
+            /** @default 0 */
+            urutan: number;
+        };
+        TokrafVariantOption: {
+            value: string;
+            label: string;
+            /**
+             * Format: int64
+             * @description Tambahan harga per unit untuk opsi ini dalam rupiah.
+             * @default 0
+             */
+            price_adjustment: number;
+        };
+        TokrafVariant: {
+            /** @example Ukuran */
+            name: string;
+            /** @default true */
+            required: boolean;
+            options: components["schemas"]["TokrafVariantOption"][];
+        };
+        TokrafPriceTier: {
+            min_quantity: number;
+            /** @description null berarti tidak ada batas maksimum. */
+            max_quantity?: number | null;
+            /**
+             * Format: int64
+             * @description Harga per unit sebelum penyesuaian opsi, dalam rupiah.
+             */
+            unit_price: number;
+        };
+        TokrafProduct: {
+            /** Format: int64 */
+            id_produk: number;
+            nama: string;
+            slug: string;
+            deskripsi?: string | null;
+            /** Format: uri */
+            foto?: string | null;
+            /** Format: int64 */
+            id_kategori: number;
+            kategori?: components["schemas"]["TokrafCategory"] | null;
+            price_tiers: components["schemas"]["TokrafPriceTier"][];
+            variants: components["schemas"]["TokrafVariant"][];
+            /** @enum {string} */
+            status: "draf" | "terbit";
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            updated_at?: string;
+        };
+        TokrafProductInput: {
+            nama: string;
+            slug: string;
+            deskripsi?: string | null;
+            /** Format: uri */
+            foto?: string | null;
+            /** Format: int64 */
+            id_kategori: number;
+            price_tiers: components["schemas"]["TokrafPriceTier"][];
+            variants?: components["schemas"]["TokrafVariant"][];
+            /**
+             * @default draf
+             * @enum {string}
+             */
+            status: "draf" | "terbit";
+        };
+        TokrafStoreProfile: {
+            nama_toko: string;
+            deskripsi: string;
+            /** @description Nomor internasional tanpa tanda plus, spasi, atau tanda baca. */
+            whatsapp_number?: string;
+            kontak?: string | null;
+            /** Format: date-time */
+            updated_at?: string;
+        };
+        TokrafStoreProfileInput: {
+            nama_toko: string;
+            deskripsi: string;
+            /** @description Nomor internasional tanpa tanda plus, spasi, atau tanda baca. */
+            whatsapp_number: string;
+            kontak?: string | null;
+        };
         Aspirasi: {
             /** Format: int64 */
             id_aspirasi?: number;
@@ -1748,6 +2243,15 @@ export interface components {
         };
         /** @description Belum login atau token tidak valid */
         Unauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description Role admin tidak memiliki izin untuk operasi ini */
+        Forbidden: {
             headers: {
                 [name: string]: unknown;
             };

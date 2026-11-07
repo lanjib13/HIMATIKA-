@@ -31,6 +31,7 @@ export default function SiteHeader() {
         <Link href="/event">Event</Link>
         <Link href="/galeri">Galeri</Link>
         <Link href="/prestasi">Prestasi</Link>
+        <Link href="/tokraf">TOKRAF</Link>
       </nav>
 
       <Link className="header-cta" href="/aspirasi">

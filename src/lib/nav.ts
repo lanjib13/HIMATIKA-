@@ -14,4 +14,11 @@ export const ADMIN_NAVIGATION = [
     icon: "10",
   },
   { href: "/dashboard/aspirasi", label: "Aspirasi", icon: "11" },
+  { href: "/dashboard/tokraf", label: "TOKRAF", icon: "12" },
+  { href: "/dashboard/tokraf/produk", label: "TOKRAF · Produk", icon: "13" },
+  { href: "/dashboard/tokraf/kategori", label: "TOKRAF · Kategori", icon: "14" },
+  { href: "/dashboard/tokraf/varian", label: "TOKRAF · Varian & harga", icon: "15" },
+  { href: "/dashboard/tokraf/pesanan", label: "TOKRAF · Pesanan", icon: "16" },
+  { href: "/dashboard/tokraf/profil", label: "TOKRAF · Profil toko", icon: "17" },
+  { href: "/dashboard/tokraf/pengaturan", label: "TOKRAF · Pengaturan", icon: "18" },
 ] as const;

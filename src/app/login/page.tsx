@@ -7,6 +7,11 @@ import { useRouter } from "next/navigation";
 type LoginResponse = {
   success?: boolean;
   message?: string;
+  data?: {
+    admin?: {
+      role?: "admin_hima" | "admin_ekraf";
+    };
+  };
 };
 
 export default function LoginPage() {
@@ -31,7 +36,11 @@ export default function LoginPage() {
         setError(payload.message ?? "Login gagal. Periksa kembali kredensial.");
         return;
       }
-      router.replace("/dashboard");
+      router.replace(
+        payload.data?.admin?.role === "admin_ekraf"
+          ? "/dashboard/tokraf"
+          : "/dashboard",
+      );
       router.refresh();
     } catch {
       setError("Tidak dapat menghubungi layanan login.");
@@ -61,9 +70,11 @@ export default function LoginPage() {
 
         {process.env.NODE_ENV !== "production" && (
           <p className="login-demo-hint">
-            Akun demo lokal
+            Akun demo lokal (development saja)
             <strong>admin@himatika.ac.id</strong>
             <strong>himatika123</strong>
+            <strong>ekraf@himatika.ac.id</strong>
+            <strong>ekraf123</strong>
           </p>
         )}
 

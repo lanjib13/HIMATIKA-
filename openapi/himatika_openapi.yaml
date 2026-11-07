@@ -1,0 +1,1787 @@
+openapi: 3.0.3
+info:
+  title: HIMATIKA Website API
+  description: >-
+    REST API untuk website profil dan pusat informasi Himpunan Mahasiswa
+    Informatika (HIMATIKA). API mencakup autentikasi admin, pengelolaan konten,
+    dashboard, aspirasi pengunjung, serta modul TOKRAF.
+  version: 1.1.0
+  contact:
+    name: Tim Pengembang HIMATIKA
+
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Development server
+  - url: https://api.example.com/api/v1
+    description: Production server (ganti dengan URL backend sebenarnya)
+
+tags:
+  - name: Authentication
+  - name: Dashboard
+  - name: Profil
+  - name: Divisi
+  - name: Anggota
+  - name: Program Kerja
+  - name: Berita
+  - name: Galeri
+  - name: Prestasi
+  - name: Struktur Organisasi
+  - name: Aspirasi
+  - name: TOKRAF
+
+security:
+  - BearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login admin
+      description: Autentikasi admin melalui Supabase Auth.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@himatika.ac.id
+                password:
+                  type: string
+                  format: password
+                  example: password123
+      responses:
+        '200':
+          description: Login berhasil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout admin
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Mendapatkan informasi admin yang sedang login
+      responses:
+        '200':
+          description: Informasi admin
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Admin'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /dashboard/summary:
+    get:
+      tags: [Dashboard]
+      summary: Mendapatkan ringkasan dashboard
+      responses:
+        '200':
+          description: Ringkasan jumlah data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          total_anggota: { type: integer, example: 25 }
+                          total_divisi: { type: integer, example: 5 }
+                          total_proker: { type: integer, example: 10 }
+                          total_berita: { type: integer, example: 15 }
+                          total_galeri: { type: integer, example: 30 }
+                          total_prestasi: { type: integer, example: 5 }
+                          aspirasi_baru: { type: integer, example: 3 }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /profil:
+    get:
+      tags: [Profil]
+      summary: Mendapatkan profil HIMATIKA
+      security: []
+      responses:
+        '200':
+          description: Data profil
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Profil'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Profil]
+      summary: Memperbarui profil HIMATIKA
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfilInput'
+      responses:
+        '200':
+          description: Profil berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Profil'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /divisi:
+    get:
+      tags: [Divisi]
+      summary: Mendapatkan daftar divisi
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedDivisi'
+    post:
+      tags: [Divisi]
+      summary: Menambahkan divisi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DivisiInput'
+      responses:
+        '201':
+          description: Divisi berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Divisi'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /divisi/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [Divisi]
+      summary: Mendapatkan detail divisi
+      security: []
+      responses:
+        '200':
+          description: Detail divisi
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Divisi'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Divisi]
+      summary: Memperbarui divisi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DivisiInput'
+      responses:
+        '200':
+          description: Divisi berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Divisi'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Divisi]
+      summary: Menghapus divisi
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /anggota:
+    get:
+      tags: [Anggota]
+      summary: Mendapatkan daftar anggota
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+        - name: divisi
+          in: query
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedAnggota'
+    post:
+      tags: [Anggota]
+      summary: Menambahkan anggota
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnggotaInput'
+      responses:
+        '201':
+          description: Anggota berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Anggota'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /anggota/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [Anggota]
+      summary: Mendapatkan detail anggota
+      security: []
+      responses:
+        '200':
+          description: Detail anggota
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Anggota'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Anggota]
+      summary: Memperbarui anggota
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnggotaInput'
+      responses:
+        '200':
+          description: Anggota berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Anggota'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Anggota]
+      summary: Menghapus anggota
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /proker:
+    get:
+      tags: [Program Kerja]
+      summary: Mendapatkan daftar program kerja
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: divisi
+          in: query
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedProker'
+    post:
+      tags: [Program Kerja]
+      summary: Menambahkan program kerja
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProkerInput'
+      responses:
+        '201':
+          description: Program kerja berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Proker'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /proker/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [Program Kerja]
+      summary: Mendapatkan detail program kerja
+      security: []
+      responses:
+        '200':
+          description: Detail program kerja
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Proker'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Program Kerja]
+      summary: Memperbarui program kerja
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProkerInput'
+      responses:
+        '200':
+          description: Program kerja berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Proker'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Program Kerja]
+      summary: Menghapus program kerja
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /berita:
+    get:
+      tags: [Berita]
+      summary: Mendapatkan daftar berita dan event yang terbit
+      description: Endpoint publik hanya mengembalikan data dengan status terbit.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+        - name: kategori
+          in: query
+          schema:
+            type: string
+            enum: [berita, event]
+        - name: status
+          in: query
+          description: Filter status hanya berlaku untuk admin.
+          schema:
+            type: string
+            enum: [draf, terbit]
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedBerita'
+    post:
+      tags: [Berita]
+      summary: Menambahkan berita atau event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeritaInput'
+      responses:
+        '201':
+          description: Berita berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Berita'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /berita/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [Berita]
+      summary: Mendapatkan detail berita atau event
+      security: []
+      responses:
+        '200':
+          description: Detail berita
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Berita'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Berita]
+      summary: Memperbarui berita atau event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeritaInput'
+      responses:
+        '200':
+          description: Berita berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Berita'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Berita]
+      summary: Menghapus berita atau event
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /galeri:
+    get:
+      tags: [Galeri]
+      summary: Mendapatkan daftar galeri
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedGaleri'
+    post:
+      tags: [Galeri]
+      summary: Menambahkan foto galeri
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GaleriInput'
+      responses:
+        '201':
+          description: Foto galeri berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Galeri'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /galeri/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [Galeri]
+      summary: Mendapatkan detail galeri
+      security: []
+      responses:
+        '200':
+          description: Detail galeri
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Galeri'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Galeri]
+      summary: Memperbarui informasi galeri
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GaleriInput'
+      responses:
+        '200':
+          description: Galeri berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Galeri'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Galeri]
+      summary: Menghapus foto galeri
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /prestasi:
+    get:
+      tags: [Prestasi]
+      summary: Mendapatkan daftar prestasi
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedPrestasi'
+    post:
+      tags: [Prestasi]
+      summary: Menambahkan prestasi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrestasiInput'
+      responses:
+        '201':
+          description: Prestasi berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Prestasi'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /prestasi/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [Prestasi]
+      summary: Mendapatkan detail prestasi
+      security: []
+      responses:
+        '200':
+          description: Detail prestasi
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Prestasi'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Prestasi]
+      summary: Memperbarui prestasi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrestasiInput'
+      responses:
+        '200':
+          description: Prestasi berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Prestasi'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Prestasi]
+      summary: Menghapus prestasi
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /struktur-organisasi:
+    get:
+      tags: [Struktur Organisasi]
+      summary: Mendapatkan struktur organisasi
+      security: []
+      parameters:
+        - name: periode
+          in: query
+          schema: { type: string, example: '2026/2027' }
+      responses:
+        '200':
+          description: Daftar struktur organisasi
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/StrukturOrganisasi'
+    post:
+      tags: [Struktur Organisasi]
+      summary: Menambahkan jabatan pada struktur organisasi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StrukturInput'
+      responses:
+        '201':
+          description: Struktur berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StrukturOrganisasi'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /struktur-organisasi/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      tags: [Struktur Organisasi]
+      summary: Memperbarui jabatan struktur organisasi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StrukturInput'
+      responses:
+        '200':
+          description: Struktur berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StrukturOrganisasi'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Struktur Organisasi]
+      summary: Menghapus jabatan struktur organisasi
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /aspirasi:
+    get:
+      tags: [Aspirasi]
+      summary: Mendapatkan daftar aspirasi
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Baru, Dibaca, Diproses, Selesai]
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedAspirasi'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Aspirasi]
+      summary: Mengirim aspirasi dari pengunjung
+      description: Publik dapat mengirim aspirasi tanpa login. Terapkan rate limiting dan validasi spam.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AspirasiInput'
+      responses:
+        '201':
+          description: Aspirasi berhasil dikirim
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id_aspirasi: { type: integer, format: int64 }
+                          status: { type: string, example: Baru }
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          description: Terlalu banyak request
+
+  /aspirasi/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [Aspirasi]
+      summary: Mendapatkan detail aspirasi
+      responses:
+        '200':
+          description: Detail aspirasi
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Aspirasi'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Aspirasi]
+      summary: Menghapus aspirasi
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /aspirasi/{id}/status:
+    patch:
+      tags: [Aspirasi]
+      summary: Memperbarui status aspirasi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [Baru, Dibaca, Diproses, Selesai]
+                  example: Diproses
+      responses:
+        '200':
+          description: Status aspirasi berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Aspirasi'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /tokraf/products:
+    get:
+      tags: [TOKRAF]
+      summary: Mendapatkan katalog produk TOKRAF
+      description: Publik hanya menerima produk berstatus terbit.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+        - name: category_id
+          in: query
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Daftar produk TOKRAF
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TokrafProduct'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+    post:
+      tags: [TOKRAF]
+      summary: Membuat produk TOKRAF
+      description: Memerlukan role admin_hima atau admin_ekraf.
+      x-required-roles: [admin_hima, admin_ekraf]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokrafProductInput'
+      responses:
+        '201':
+          description: Produk berhasil dibuat
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/TokrafProduct'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /tokraf/products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [TOKRAF]
+      summary: Mendapatkan detail produk TOKRAF
+      security: []
+      responses:
+        '200':
+          description: Detail produk TOKRAF yang terbit
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/TokrafProduct'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [TOKRAF]
+      summary: Memperbarui produk TOKRAF
+      description: Memerlukan role admin_hima atau admin_ekraf.
+      x-required-roles: [admin_hima, admin_ekraf]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokrafProductInput'
+      responses:
+        '200':
+          description: Produk berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/TokrafProduct'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [TOKRAF]
+      summary: Menghapus produk TOKRAF
+      description: Memerlukan role admin_hima atau admin_ekraf.
+      x-required-roles: [admin_hima, admin_ekraf]
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tokraf/categories:
+    get:
+      tags: [TOKRAF]
+      summary: Mendapatkan kategori produk TOKRAF
+      security: []
+      responses:
+        '200':
+          description: Daftar kategori TOKRAF
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TokrafCategory'
+    post:
+      tags: [TOKRAF]
+      summary: Membuat kategori TOKRAF
+      description: Memerlukan role admin_hima atau admin_ekraf.
+      x-required-roles: [admin_hima, admin_ekraf]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokrafCategoryInput'
+      responses:
+        '201':
+          description: Kategori berhasil dibuat
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/TokrafCategory'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /tokraf/categories/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      tags: [TOKRAF]
+      summary: Memperbarui kategori TOKRAF
+      description: Memerlukan role admin_hima atau admin_ekraf.
+      x-required-roles: [admin_hima, admin_ekraf]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokrafCategoryInput'
+      responses:
+        '200':
+          description: Kategori berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/TokrafCategory'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [TOKRAF]
+      summary: Menghapus kategori TOKRAF
+      description: Gagal dengan 409 jika kategori masih dipakai produk.
+      x-required-roles: [admin_hima, admin_ekraf]
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Kategori masih digunakan oleh produk
+
+  /tokraf/profile:
+    get:
+      tags: [TOKRAF]
+      summary: Mendapatkan profil toko TOKRAF
+      security: []
+      responses:
+        '200':
+          description: Profil toko TOKRAF
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/TokrafStoreProfile'
+    put:
+      tags: [TOKRAF]
+      summary: Memperbarui profil toko TOKRAF
+      description: Memerlukan role admin_hima atau admin_ekraf.
+      x-required-roles: [admin_hima, admin_ekraf]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokrafStoreProfileInput'
+      responses:
+        '200':
+          description: Profil toko berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Success'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/TokrafStoreProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase Auth access token.
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 10 }
+    Search:
+      name: search
+      in: query
+      schema: { type: string }
+
+  schemas:
+    Success:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Data berhasil ditampilkan }
+    Error:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string, example: Terjadi kesalahan }
+        errors:
+          nullable: true
+          oneOf:
+            - type: object
+            - type: array
+              items: {}
+            - type: string
+    Pagination:
+      type: object
+      properties:
+        page: { type: integer, example: 1 }
+        limit: { type: integer, example: 10 }
+        total_data: { type: integer, example: 25 }
+        total_pages: { type: integer, example: 3 }
+    PaginatedResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Data berhasil ditampilkan }
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Admin:
+      type: object
+      required: [user_id, nama, email, role]
+      properties:
+        user_id: { type: string, format: uuid }
+        nama: { type: string, example: Admin HIMATIKA }
+        email: { type: string, format: email }
+        role:
+          type: string
+          enum: [admin_hima, admin_ekraf]
+          description: Role menjadi sumber otorisasi server; bukan sekadar kontrol tampilan.
+    LoginResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Login berhasil }
+        data:
+          type: object
+          properties:
+            access_token: { type: string }
+            token_type: { type: string, example: Bearer }
+            admin:
+              $ref: '#/components/schemas/Admin'
+
+    Profil:
+      type: object
+      properties:
+        id_profil: { type: integer, format: int64 }
+        nama_organisasi: { type: string }
+        deskripsi: { type: string, nullable: true }
+        sejarah: { type: string, nullable: true }
+        visi: { type: string, nullable: true }
+        misi: { type: string, nullable: true }
+        logo: { type: string, nullable: true }
+        updated_at: { type: string, format: date-time }
+    ProfilInput:
+      type: object
+      required: [nama_organisasi]
+      properties:
+        nama_organisasi: { type: string, maxLength: 150 }
+        deskripsi: { type: string, nullable: true }
+        sejarah: { type: string, nullable: true }
+        visi: { type: string, nullable: true }
+        misi: { type: string, nullable: true }
+        logo: { type: string, nullable: true }
+
+    Divisi:
+      type: object
+      properties:
+        id_divisi: { type: integer, format: int64 }
+        nama_divisi: { type: string }
+        deskripsi: { type: string, nullable: true }
+        slug: { type: string }
+        created_at: { type: string, format: date-time }
+    DivisiInput:
+      type: object
+      required: [nama_divisi, slug]
+      properties:
+        nama_divisi: { type: string, maxLength: 100 }
+        deskripsi: { type: string, nullable: true }
+        slug: { type: string, maxLength: 120 }
+
+    Anggota:
+      type: object
+      properties:
+        id_anggota: { type: integer, format: int64 }
+        id_divisi: { type: integer, format: int64, nullable: true }
+        nama: { type: string }
+        nim: { type: string, nullable: true }
+        foto: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+    AnggotaInput:
+      type: object
+      required: [nama]
+      properties:
+        id_divisi: { type: integer, format: int64, nullable: true }
+        nama: { type: string, maxLength: 100 }
+        nim: { type: string, maxLength: 30, nullable: true }
+        foto: { type: string, nullable: true }
+
+    Proker:
+      type: object
+      properties:
+        id_proker: { type: integer, format: int64 }
+        id_divisi: { type: integer, format: int64 }
+        nama_proker: { type: string }
+        deskripsi: { type: string, nullable: true }
+        tanggal_mulai: { type: string, format: date, nullable: true }
+        tanggal_selesai: { type: string, format: date, nullable: true }
+        status:
+          type: string
+          enum: [rencana, berjalan, selesai]
+    ProkerInput:
+      type: object
+      required: [id_divisi, nama_proker]
+      properties:
+        id_divisi: { type: integer, format: int64 }
+        nama_proker: { type: string, maxLength: 150 }
+        deskripsi: { type: string, nullable: true }
+        tanggal_mulai: { type: string, format: date, nullable: true }
+        tanggal_selesai: { type: string, format: date, nullable: true }
+        status:
+          type: string
+          enum: [rencana, berjalan, selesai]
+          default: rencana
+
+    Berita:
+      type: object
+      properties:
+        id_berita: { type: integer, format: int64 }
+        judul: { type: string }
+        slug: { type: string }
+        kategori: { type: string, enum: [berita, event] }
+        isi: { type: string }
+        gambar_sampul: { type: string, nullable: true }
+        tanggal: { type: string, format: date, nullable: true }
+        status: { type: string, enum: [draf, terbit] }
+        created_by: { type: string, format: uuid, nullable: true }
+        created_at: { type: string, format: date-time }
+    BeritaInput:
+      type: object
+      required: [judul, slug, kategori, isi]
+      properties:
+        judul: { type: string, maxLength: 200 }
+        slug: { type: string, maxLength: 220 }
+        kategori: { type: string, enum: [berita, event] }
+        isi: { type: string }
+        gambar_sampul: { type: string, nullable: true }
+        tanggal: { type: string, format: date, nullable: true }
+        status: { type: string, enum: [draf, terbit], default: draf }
+
+    Galeri:
+      type: object
+      properties:
+        id_galeri: { type: integer, format: int64 }
+        judul: { type: string }
+        deskripsi: { type: string, nullable: true }
+        gambar: { type: string }
+        tanggal_kegiatan: { type: string, format: date, nullable: true }
+        created_by: { type: string, format: uuid, nullable: true }
+        created_at: { type: string, format: date-time }
+    GaleriInput:
+      type: object
+      required: [judul, gambar]
+      properties:
+        judul: { type: string, maxLength: 150 }
+        deskripsi: { type: string, nullable: true }
+        gambar: { type: string }
+        tanggal_kegiatan: { type: string, format: date, nullable: true }
+
+    Prestasi:
+      type: object
+      properties:
+        id_prestasi: { type: integer, format: int64 }
+        nama_prestasi: { type: string }
+        tingkat: { type: string, nullable: true }
+        penyelenggara: { type: string, nullable: true }
+        tanggal: { type: string, format: date, nullable: true }
+        deskripsi: { type: string, nullable: true }
+        foto: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+    PrestasiInput:
+      type: object
+      required: [nama_prestasi]
+      properties:
+        nama_prestasi: { type: string, maxLength: 200 }
+        tingkat: { type: string, maxLength: 50, nullable: true }
+        penyelenggara: { type: string, maxLength: 150, nullable: true }
+        tanggal: { type: string, format: date, nullable: true }
+        deskripsi: { type: string, nullable: true }
+        foto: { type: string, nullable: true }
+
+    StrukturOrganisasi:
+      type: object
+      properties:
+        id_struktur: { type: integer, format: int64 }
+        id_anggota: { type: integer, format: int64 }
+        jabatan: { type: string }
+        urutan: { type: integer }
+        periode: { type: string }
+    StrukturInput:
+      type: object
+      required: [id_anggota, jabatan, periode]
+      properties:
+        id_anggota: { type: integer, format: int64 }
+        jabatan: { type: string, maxLength: 100 }
+        urutan: { type: integer, default: 0 }
+        periode: { type: string, maxLength: 20, example: '2026/2027' }
+
+    TokrafCategory:
+      type: object
+      required: [id_kategori, nama, slug, urutan]
+      properties:
+        id_kategori: { type: integer, format: int64 }
+        nama: { type: string, maxLength: 100 }
+        slug: { type: string, maxLength: 120 }
+        urutan: { type: integer, minimum: 0, default: 0 }
+    TokrafCategoryInput:
+      type: object
+      required: [nama, slug]
+      properties:
+        nama: { type: string, maxLength: 100 }
+        slug: { type: string, maxLength: 120 }
+        urutan: { type: integer, minimum: 0, default: 0 }
+
+    TokrafVariantOption:
+      type: object
+      required: [value, label, price_adjustment]
+      properties:
+        value: { type: string, maxLength: 80 }
+        label: { type: string, maxLength: 100 }
+        price_adjustment:
+          type: integer
+          format: int64
+          minimum: 0
+          default: 0
+          description: Tambahan harga per unit untuk opsi ini dalam rupiah.
+    TokrafVariant:
+      type: object
+      required: [name, options]
+      properties:
+        name: { type: string, maxLength: 80, example: Ukuran }
+        required: { type: boolean, default: true }
+        options:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/TokrafVariantOption'
+    TokrafPriceTier:
+      type: object
+      required: [min_quantity, unit_price]
+      properties:
+        min_quantity: { type: integer, minimum: 1 }
+        max_quantity:
+          type: integer
+          minimum: 1
+          nullable: true
+          description: null berarti tidak ada batas maksimum.
+        unit_price:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Harga per unit sebelum penyesuaian opsi, dalam rupiah.
+    TokrafProduct:
+      type: object
+      required: [id_produk, nama, slug, id_kategori, price_tiers, variants, status]
+      properties:
+        id_produk: { type: integer, format: int64 }
+        nama: { type: string, maxLength: 150 }
+        slug: { type: string, maxLength: 170 }
+        deskripsi: { type: string, nullable: true }
+        foto: { type: string, format: uri, nullable: true }
+        id_kategori: { type: integer, format: int64 }
+        kategori:
+          allOf:
+            - $ref: '#/components/schemas/TokrafCategory'
+          nullable: true
+        price_tiers:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/TokrafPriceTier'
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokrafVariant'
+        status: { type: string, enum: [draf, terbit] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    TokrafProductInput:
+      type: object
+      required: [nama, slug, id_kategori, price_tiers]
+      properties:
+        nama: { type: string, maxLength: 150 }
+        slug: { type: string, maxLength: 170 }
+        deskripsi: { type: string, nullable: true }
+        foto: { type: string, format: uri, nullable: true }
+        id_kategori: { type: integer, format: int64 }
+        price_tiers:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/TokrafPriceTier'
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokrafVariant'
+        status: { type: string, enum: [draf, terbit], default: draf }
+
+    TokrafStoreProfile:
+      type: object
+      required: [nama_toko, deskripsi]
+      properties:
+        nama_toko: { type: string, maxLength: 150 }
+        deskripsi: { type: string, maxLength: 2000 }
+        whatsapp_number:
+          type: string
+          pattern: '^[1-9][0-9]{7,14}$'
+          description: Nomor internasional tanpa tanda plus, spasi, atau tanda baca.
+        kontak: { type: string, maxLength: 200, nullable: true }
+        updated_at: { type: string, format: date-time }
+    TokrafStoreProfileInput:
+      type: object
+      required: [nama_toko, deskripsi, whatsapp_number]
+      properties:
+        nama_toko: { type: string, maxLength: 150 }
+        deskripsi: { type: string, maxLength: 2000 }
+        whatsapp_number:
+          type: string
+          pattern: '^[1-9][0-9]{7,14}$'
+          description: Nomor internasional tanpa tanda plus, spasi, atau tanda baca.
+        kontak: { type: string, maxLength: 200, nullable: true }
+
+    Aspirasi:
+      type: object
+      properties:
+        id_aspirasi: { type: integer, format: int64 }
+        nama: { type: string, nullable: true }
+        kontak: { type: string, nullable: true }
+        kategori: { type: string }
+        pesan: { type: string }
+        status: { type: string, enum: [Baru, Dibaca, Diproses, Selesai] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    AspirasiInput:
+      type: object
+      required: [kategori, pesan]
+      properties:
+        nama: { type: string, maxLength: 100, nullable: true }
+        kontak: { type: string, maxLength: 100, nullable: true }
+        kategori: { type: string, maxLength: 50 }
+        pesan: { type: string, minLength: 5 }
+
+  responses:
+    SuccessMessage:
+      description: Operasi berhasil
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: true }
+              message: { type: string, example: Operasi berhasil }
+    BadRequest:
+      description: Request tidak valid
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Belum login atau token tidak valid
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Role admin tidak memiliki izin untuk operasi ini
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Data tidak ditemukan
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Validasi data gagal
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    PaginatedDivisi:
+      description: Daftar divisi
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PaginatedResponse'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Divisi'
+    PaginatedAnggota:
+      description: Daftar anggota
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PaginatedResponse'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Anggota'
+    PaginatedProker:
+      description: Daftar program kerja
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PaginatedResponse'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Proker'
+    PaginatedBerita:
+      description: Daftar berita
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PaginatedResponse'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Berita'
+    PaginatedGaleri:
+      description: Daftar galeri
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PaginatedResponse'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Galeri'
+    PaginatedPrestasi:
+      description: Daftar prestasi
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PaginatedResponse'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Prestasi'
+    PaginatedAspirasi:
+      description: Daftar aspirasi
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PaginatedResponse'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Aspirasi'

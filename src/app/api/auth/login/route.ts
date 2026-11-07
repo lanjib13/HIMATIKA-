@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   ADMIN_SESSION_COOKIE,
+  DEMO_EKRAF_SESSION_TOKEN,
   DEMO_SESSION_TOKEN,
   getHimatikaApiUrl,
   isDemoAuthEnabled,
@@ -15,6 +16,7 @@ type LoginResponse = {
       user_id?: string;
       nama?: string;
       email?: string;
+      role?: "admin_hima" | "admin_ekraf";
     };
   };
 };
@@ -46,34 +48,50 @@ export async function POST(request: NextRequest) {
   }
 
   if (isDemoAuthEnabled()) {
-    const validCredentials =
+    const isHimaAdmin =
       credentials.email.trim().toLowerCase() === "admin@himatika.ac.id" &&
       credentials.password === "himatika123";
-    if (!validCredentials) {
+    const isEkrafAdmin =
+      credentials.email.trim().toLowerCase() === "ekraf@himatika.ac.id" &&
+      credentials.password === "ekraf123";
+    if (!isHimaAdmin && !isEkrafAdmin) {
       return NextResponse.json(
         { success: false, message: "Email atau kata sandi tidak valid." },
         { status: 401 },
       );
     }
 
+    const demoAdmin = isEkrafAdmin
+      ? {
+          user_id: "demo-ekraf",
+          nama: "Admin Ekraf Demo",
+          email: "ekraf@himatika.ac.id",
+          role: "admin_ekraf" as const,
+        }
+      : {
+          user_id: "demo-admin",
+          nama: "Admin Demo",
+          email: "admin@himatika.ac.id",
+          role: "admin_hima" as const,
+        };
     const response = NextResponse.json({
       success: true,
       message: "Login demo berhasil.",
       data: {
-        admin: {
-          user_id: "demo-admin",
-          nama: "Admin Demo",
-          email: "admin@himatika.ac.id",
-        },
+        admin: demoAdmin,
       },
     });
-    response.cookies.set(ADMIN_SESSION_COOKIE, DEMO_SESSION_TOKEN, {
+    response.cookies.set(
+      ADMIN_SESSION_COOKIE,
+      isEkrafAdmin ? DEMO_EKRAF_SESSION_TOKEN : DEMO_SESSION_TOKEN,
+      {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60,
-    });
+      },
+    );
     return response;
   }
 

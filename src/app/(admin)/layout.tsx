@@ -11,7 +11,10 @@ export default async function DashboardLayout({
   if (!admin) redirect("/login");
 
   return (
-    <AdminSidebar adminName={admin.nama || admin.email || "Admin"}>
+    <AdminSidebar
+      adminName={admin.nama || admin.email || "Admin"}
+      adminRole={admin.role}
+    >
       {children}
     </AdminSidebar>
   );

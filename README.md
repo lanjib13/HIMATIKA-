@@ -48,7 +48,7 @@ src/
   components/
     layout/        # Navbar, footer, public layout, dan admin sidebar
     ui/            # Page header dan status loading/error/kosong
-    sections/      # Section home, halaman publik, form aspirasi, dan admin
+    sections/      # Section home, halaman publik, TOKRAF, aspirasi, dan admin
   hooks/
     use-api-resource.ts
   lib/
@@ -63,16 +63,13 @@ src/
     auth/          # Akses dan verifikasi sesi server
 public/
   images/          # Aset gambar statis
-docs/
-  himatika_openapi.yaml # Kontrak API
-  API-INTEGRATION.md    # Panduan endpoint, konfigurasi, dan gap kontrak
-  FRONTEND-SETUP.md     # Catatan kondisi sebelum dan sesudah pengerjaan
+openapi/
+  himatika_openapi.yaml # Sumber kontrak API yang dilacak Git
 ```
 
 Route group `(public)` dan `(admin)` hanya mengelompokkan implementasi; URL
-publik tetap mengikuti sitemap seperti `/berita` dan `/dashboard/berita`.
-Lihat [docs/directory.md](./docs/directory.md) untuk pohon direktori lengkap
-beserta alasan perbedaan dari rancangan awal.
+publik tetap mengikuti sitemap seperti `/berita`, `/tokraf`, dan
+`/dashboard/berita`.
 
 ## Status implementasi
 
@@ -80,18 +77,23 @@ Beranda memuat data profil, divisi, anggota, program kerja, berita dan event
 secara terpisah, galeri, dan prestasi dari API serta menyediakan form
 aspirasi. Admin dapat login/logout, melihat ringkasan dashboard, mengelola
 profil dan resource CRUD, serta membaca, mengubah status, dan menghapus
-aspirasi.
+aspirasi. Modul TOKRAF menyediakan katalog, detail produk, kalkulator harga
+bertingkat, pemesanan via WhatsApp, serta dashboard demo produk/kategori/profil.
 
 Pada development, login memakai akun demo lokal `admin@himatika.ac.id` /
 `himatika123` dan tidak memanggil endpoint autentikasi backend. Demo login
 dinonaktifkan otomatis pada production; data dashboard dan operasi CRUD tetap
 membutuhkan backend.
+Login demo Admin Ekraf memakai `ekraf@himatika.ac.id` / `ekraf123` dan juga
+hanya tersedia di development.
 
 Halaman publik mencakup profil, aspirasi, serta daftar dan detail anggota,
 divisi, program kerja, berita, event, galeri, dan prestasi. Tautan detail
 menggunakan ID karena endpoint detail pada kontrak OpenAPI menerima ID, bukan
 slug. Tabel admin memuat paling banyak 100 data per resource dan belum memiliki
-pagination.
+pagination. Data TOKRAF saat ini adalah fixture demo yang disimpan di
+`localStorage`; harga contoh dan role UI bukan integrasi database atau
+otorisasi produksi. Form WhatsApp tidak menyimpan pesanan pada website.
 Upload berkas galeri belum didukung kontrak API; input galeri menggunakan URL.
 
 ## Hal yang perlu disiapkan sebelum rilis
@@ -99,8 +101,8 @@ Upload berkas galeri belum didukung kontrak API; input galeri menggunakan URL.
 - Pastikan backend berjalan dan URL production menggantikan placeholder.
 - Uji integrasi login dan operasi admin dengan backend HIMATIKA yang berjalan.
 - Lengkapi kontrak upload foto dan data struktur organisasi.
-
-Detail API ada di [docs/API-INTEGRATION.md](./docs/API-INTEGRATION.md).
-Riwayat setup dan validasi ada di [docs/FRONTEND-SETUP.md](./docs/FRONTEND-SETUP.md).
+- Implementasikan endpoint TOKRAF pada backend sesuai
+  `openapi/himatika_openapi.yaml`, termasuk pemeriksaan role Admin Hima/Ekraf.
+- Ganti fixture dan penyimpanan demo TOKRAF dengan API/database sebelum rilis.
 
 # H I M A T I K A -

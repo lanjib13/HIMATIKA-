@@ -4,11 +4,20 @@ import type { components } from "@/lib/api/schema";
 
 export const ADMIN_SESSION_COOKIE = "himatika_admin_session";
 export const DEMO_SESSION_TOKEN = "himatika-demo-session";
+export const DEMO_EKRAF_SESSION_TOKEN = "himatika-demo-ekraf-session";
 
-const demoAdmin: components["schemas"]["Admin"] = {
+const demoHimaAdmin: components["schemas"]["Admin"] = {
   user_id: "demo-admin",
   nama: "Admin Demo",
   email: "admin@himatika.ac.id",
+  role: "admin_hima",
+};
+
+const demoEkrafAdmin: components["schemas"]["Admin"] = {
+  user_id: "demo-ekraf",
+  nama: "Admin Ekraf Demo",
+  email: "ekraf@himatika.ac.id",
+  role: "admin_ekraf",
 };
 
 async function getAdminSessionValue() {
@@ -18,7 +27,7 @@ async function getAdminSessionValue() {
 
 export async function getAdminAccessToken() {
   const sessionValue = await getAdminSessionValue();
-  return sessionValue === DEMO_SESSION_TOKEN ? undefined : sessionValue;
+  return isDemoSession(sessionValue) ? undefined : sessionValue;
 }
 
 export function isDemoAuthEnabled() {
@@ -26,7 +35,10 @@ export function isDemoAuthEnabled() {
 }
 
 export function isDemoSession(value: string | undefined) {
-  return isDemoAuthEnabled() && value === DEMO_SESSION_TOKEN;
+  return (
+    isDemoAuthEnabled() &&
+    (value === DEMO_SESSION_TOKEN || value === DEMO_EKRAF_SESSION_TOKEN)
+  );
 }
 
 export function getHimatikaApiUrl(path: string) {
@@ -38,7 +50,11 @@ export function getHimatikaApiUrl(path: string) {
 
 export async function getAuthenticatedAdmin() {
   const sessionValue = await getAdminSessionValue();
-  if (isDemoSession(sessionValue)) return demoAdmin;
+  if (isDemoSession(sessionValue)) {
+    return sessionValue === DEMO_EKRAF_SESSION_TOKEN
+      ? demoEkrafAdmin
+      : demoHimaAdmin;
+  }
 
   const token = sessionValue;
   if (!token) return null;

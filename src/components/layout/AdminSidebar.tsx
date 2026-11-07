@@ -4,18 +4,25 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ADMIN_NAVIGATION } from "@/lib/nav";
+import type { components } from "@/lib/api/schema";
 
 export default function AdminShell({
   adminName,
+  adminRole,
   children,
 }: {
   adminName: string;
+  adminRole: components["schemas"]["Admin"]["role"];
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const navigation =
+    adminRole === "admin_ekraf"
+      ? ADMIN_NAVIGATION.filter((item) => item.href.startsWith("/dashboard/tokraf"))
+      : ADMIN_NAVIGATION;
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -48,7 +55,7 @@ export default function AdminShell({
 
         <div className="admin-sidebar-label">WORKSPACE</div>
         <nav aria-label="Navigasi dashboard" className="admin-navigation">
-          {ADMIN_NAVIGATION.map((item) => {
+          {navigation.map((item) => {
             const active =
               item.href === "/dashboard"
                 ? pathname === item.href
@@ -73,7 +80,7 @@ export default function AdminShell({
           </span>
           <span className="admin-identity">
             <strong>{adminName}</strong>
-            <small>Administrator</small>
+            <small>{adminRole === "admin_ekraf" ? "Admin Ekraf" : "Admin Hima"}</small>
           </span>
           <button
             aria-label="Logout"
@@ -93,7 +100,7 @@ export default function AdminShell({
           <div>
             <span className="admin-breadcrumb">HIMATIKA / ADMIN</span>
             <strong>
-              {ADMIN_NAVIGATION.find(
+              {navigation.find(
                 (item) =>
                   pathname === item.href ||
                   (item.href !== "/dashboard" && pathname.startsWith(item.href)),
